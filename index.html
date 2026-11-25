@@ -211,8 +211,7 @@ canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-in
     <div class="card center">
       <p class="sub" style="margin:0">학생들은 이 주소로 들어와서 <b>학생</b>을 누르고 방 번호를 입력해요</p>
       <div class="code" id="roomCode">----</div>
-      <div class="linkbox" id="roomLink"></div>
-      <div class="row" style="margin-top:12px"><button class="btn orange" id="btnCopy" style="font-size:1.1rem;padding:10px 18px">🔗 주소 복사</button></div>
+      <div class="sub" id="roomStatus" style="font-size:1.05rem;min-height:1.4em"></div>
     </div>
     <div class="card center">
       <div class="count">입장한 친구 <b id="pCount">0</b>명</div>
@@ -584,7 +583,7 @@ $('#btnTeacher').onclick = ()=>{
   G.role='teacher'; document.body.classList.add('teacher'); SND.sfx('click'); applyTitle(TITLE);
   $('#homeErr').textContent=''; G.hostReady=false;
   // 방 만드는 동안에도 선생님 화면을 바로 보여 줘요 (이때도 [문제 수정]을 쓸 수 있어요)
-  $('#roomCode').textContent='····'; $('#roomLink').textContent='⏳ 방을 만드는 중이에요… (최대 15초)';
+  $('#roomCode').textContent='····'; $('#roomStatus').textContent='⏳ 방을 만드는 중이에요… (최대 15초)';
   renderLobby(); show('s-tlobby');
   clearTimeout(G.openTo);
   G.openTo=setTimeout(()=>{ if(!G.hostReady) hostFail('방을 만들지 못했어요. 인터넷이 연결되어 있는지, 학교 네트워크가 실시간 연결을 막고 있지는 않은지 확인하고 다시 눌러 주세요. (휴대폰 핫스팟으로 시험해 보세요)'); },15000);
@@ -607,8 +606,7 @@ function hostOpen(){
     clearTimeout(G.openTo); G.hostReady=true; $('#homeErr').textContent='';
     G.code = code;
     $('#roomCode').textContent = code;
-    const base = location.href.split('?')[0].split('#')[0];
-    $('#roomLink').textContent = base + '?room=' + code + '&t=' + encodeURIComponent(TITLE);
+    $('#roomStatus').textContent = '';
     if(!$('#s-editor').classList.contains('active')){ show('s-tlobby'); }
     EDFROM='s-tlobby'; renderLobby();
     try{ if(navigator.wakeLock) navigator.wakeLock.request('screen').catch(()=>{}); }catch(e){}
@@ -624,12 +622,6 @@ function hostOpen(){
     conn.on('error', ()=>hostOnClose(conn));
   });
 }
-
-$('#btnCopy').onclick = ()=>{
-  const t=$('#roomLink').textContent;
-  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{ $('#btnCopy').textContent='✅ 복사됨!'; }).catch(()=>{ $('#btnCopy').textContent='주소를 직접 선택해 복사하세요'; });
-  SND.sfx('click');
-};
 
 function names(){ return H.order.filter(n=>H.players[n]); }
 function connectedNames(){ return names().filter(n=>H.players[n].connected); }
